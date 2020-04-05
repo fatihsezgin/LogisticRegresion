@@ -3,53 +3,51 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import where
 from pylab import scatter, show, legend, xlabel, ylabel
-from decimal import Decimal
 
 #columns that is going to readed into csv
 columns = ["SepalLengthCm", "SepalWidthCm", "PetalLengthCm", "PetalWidthCm"]
-
 data = pd.read_csv('iris.csv', usecols=[1, 2, 3, 4, 5])
 
-# the data comes from csv file stored in a
-a = data[columns]
-a = np.array(a)
+# the data comes from csv file stored in xTemp
+xTemp = data[columns]# read the related columns
+xTemp = np.array(xTemp)
 X = []
-# To append 1 to the each element in the a
-for i in range(len(a)):
+# To append 1 to the each element in the xTemp to fit the hypothesis
+for i in range(len(xTemp)):
     tmp = np.array([1])
-    tmpArray = np.concatenate(([tmp, a[i]]), axis=0)
+    tmpArray = np.concatenate(([tmp, xTemp[i]]), axis=0)
     X.append(tmpArray)
 
-X = np.array(X)
+X = np.array(X) #X is converted into numpy array which will be helpful for calculating.
 
 target_map = {'Iris-setosa':0,
               'Iris-versicolor':1}
 
 data[["Species"]] = data['Species'].apply(lambda x: target_map[x])
-Y = np.array(data[["Species"]])
+Y = np.array(data[["Species"]]) # Iris-setosa converted to 0, Iris-versicolor converted to 1
 
-
+# test data is reading
 testData = pd.read_csv('iristest2.csv', usecols=[1, 2, 3, 4, 5])
-b = testData[columns]
-b = np.array(b)
+xTestTemp = testData[columns]# read the related columns
+xTestTemp = np.array(xTestTemp)
 X_test = []
 
-# To append 1 to the each element in the a
-for i in range(len(b)):
+# To append 1 to the each element in the to fit the hypothesis
+for i in range(len(xTestTemp)):
     tmp = np.array([1])
-    tmpArray = np.concatenate(([tmp, b[i]]), axis=0)
+    tmpArray = np.concatenate(([tmp, xTestTemp[i]]), axis=0)
     X_test.append(tmpArray)
 
-X_test = np.array(X_test)
+X_test = np.array(X_test) #X_test is converted into numpy array.
 
 testData[["Species"]] = testData['Species'].apply(lambda x: target_map[x])
-Y_test = np.array(testData[["Species"]])
+Y_test = np.array(testData[["Species"]])# test data is inserted into Y_test
 
 
  
 theta = [0, 0, 0, 0, 0] # declare the initial theta
 iterations = 1000 # iteration
-alpha = 0.1 #learning rate
+alpha = 0.3 #learning rate
 
 
 # @param z : applies sigmoid function to given parameter
@@ -81,7 +79,6 @@ def CostFunction():
 # @param j : theta index that will be calculated
 # @returns the new value for theta[j]
 # function βj = βj- a{i=1:n}Σ(h(xi)-yi)xij
-
 # where β is the theta array , a = learning rate,  xi = feature vector, xij = β value for xi
 # yi = label of the feature vector
 def CostDerivative(j):
@@ -93,7 +90,8 @@ def CostDerivative(j):
         hi = Hypothesis(xi)
         error = (hi - Y[i]) * xij
         sumErrors += error
-    theta[j] = theta[j] - sumErrors
+    c = float(alpha) / float(n)    
+    theta[j] = theta[j] - (sumErrors *c)
     return theta[j]
 
 
@@ -130,9 +128,12 @@ def plot_regression_line(x, y, b):
 
     plt.figure()
     # plotting the actual points as scatter plot 
-    plt.scatter(X[versicolor[0], 3], X[versicolor[0], 4], color= 'r', label="Versicolor") # versicolor
+    plt.scatter(X[versicolor[0], 1], X[versicolor[0], 2], color= 'r', label="Versicolor") # versicolor
     plt.scatter(X[setosa[0], 3], X[setosa[0], 4], color = 'b',label="Setosa") # setosa
     
+    #plt.scatter(x, y, color=['red'],  label="Versicolor") # versicolor    
+    #plt.plot(x,color='red', label= 'Sepal Area')
+    #plt.plot(y,color='blue', label='Petal Area')
     # predicted response vector 
     y_pred = b[0] + b[1]*x 
   
@@ -152,7 +153,7 @@ def Predict():
     score = 0
     length = len(X_test)
     for i in range(length):
-        prediction = round(Hypothesis(X_test[i]),5)
+        prediction = round(Hypothesis(X_test[i]))
         answer = Y_test[i]
         print("prediction was " + str(prediction) + " answer was " + str(answer))
         if prediction == answer:
@@ -164,6 +165,7 @@ def Predict():
 
 
 def LogisticRegression():
+
     for i in range(iterations):
         new_theta = GradientDescent()
         theta = new_theta
@@ -173,6 +175,7 @@ def LogisticRegression():
     Predict()
 
     #used for estimating the regression lines between the features.
+    
     # b = estimate_coef(X[:,1], X[:,2])
     # plot_regression_line(X[:,1], X[:,2], b)
     # b = estimate_coef(X[:,1], X[:,3])
